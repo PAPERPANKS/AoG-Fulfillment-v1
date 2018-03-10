@@ -1,0 +1,25 @@
+{
+  "name": "app-name",
+  "version": "1.0.0",
+  "description": "A basic template for a webhook that can work for your action on google (or Dialogflow) integration",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.16.2",
+    "actions-on-google": "^1.8.2",
+    "body-parser": "^1.18.2",
+    "request": "^2.83.0",
+    "es6-map": "^0.1.5"
+  },
+  "engines": {
+    "node": "6.9.1"
+  },
+  "repository": "https://github.com/<username>/<reponame>",
+  "keywords": [
+    "node",
+    "actions-on-google",
+    "express"
+  ]
+}
