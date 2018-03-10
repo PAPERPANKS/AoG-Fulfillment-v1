@@ -8,15 +8,12 @@ const Assistant = require('actions-on-google').DialogflowApp;
 const request = require('request');
 
 // the actions we are supporting (get them from api.ai)
-const ACTION_PRICE = 'price';
-const ACTION_UNKNOWN = 'input.unknown';
-const ACTION_WELCOME = 'input.welcome';
+const ACTION_PRICE = 'price'; //add this in Intents section in Dialogflow
 
 // The end-points to our api calls
-const EXT_BITCOIN_API_URL = "https://blockchain.info";
-const EXT_PRICE = "/q/24hrprice";
+const api_url = "https://api.coinmarketcap.com/v1/ticker/";
 
-// [STARt]
+// main
 const dialogflowFirebaseFulfillment = (req, res) => {
 	const assistant = new Assistant({
 		request: req,
@@ -25,49 +22,34 @@ const dialogflowFirebaseFulfillment = (req, res) => {
 	console.log('Request headers: ' + JSON.stringify(req.headers));
 	console.log('Request body: ' + JSON.stringify(req.body));
 
-	// Declare parameters name here
-	//const COINS_PARAMETER = 'crypto_coins'; // create this in entities in Diagflow
-	//let coin = assistant.getArgument(COINS_PARAMETER); 
+	//Declare parameters name here
+	const COINS_PARAMETER = 'crypto_coins'; // add this in entities in Diagflow
+	let coin = assistant.getArgument(COINS_PARAMETER); 
 
-	// write functions here to handle intents 
-	function welcomeHandler(assistant) {
-		console.log('** WELCOME' + ACTION_WELCOME);
-		const msg = "Welcome! message here.";
-		assistant.ask(msg);
-	}
-	
-	function errorHandler(assistant) {
-		console.log('** UNKNOWN' + ACTION_UNKNOWN);
-		const msg = "Unknown Intents";
-		assistant.tell(msg);
-	}
+    // write functions here to handle intents 
+    
     // Intent for price
 	function priceHandler(assistant) { 
 		console.log('** Handling action: ' + ACTION_PRICE);
-		let requestURL = EXT_BITCOIN_API_URL + EXT_PRICE;
+		let requestURL = api_url + encodeURIComponent(coin);
 		request(requestURL, function(error, response) {
 			if (error) {
 				console.log("got an error: " + error);
-				//next(error);
 			} else {
 				let body = JSON.parse(response.body);
-				//let price = body[0][value-name];
-                let price = body[0];
-				logObject('the current coin price : ', price);
+				let price = body[0]['price_usd'];
+                
+				logObject('logging price : ', price);
 				// Respond to the user with the current price.
-				const msg = "Right now the price is " + price + "What else would you like to know?";
-				assistant.ask(msg);
+				const msg = "Right now the price is $ " + price ;
+				assistant.tell(msg);
 			}
 		});
 	}
-
-	// Fulfill total bitcoin action 
 	
 	// The Entry point to all our actions
 	const actionMap = new Map();
 	actionMap.set(ACTION_PRICE, priceHandler);
-	actionMap.set(ACTION_UNKNOWN, errorHandler);
-    actionMap.set(ACTION_WELCOME, welcomeHandler);
 
 	assistant.handleRequest(actionMap);
 };
@@ -78,6 +60,6 @@ function logObject(message, object) {
 	console.log(message);
 	console.log(JSON.parse(JSON.stringify(object)));
 }
-// [END CryptoCoin Info]
+
 const functions = require('firebase-functions');
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest(dialogflowFirebaseFulfillment);
