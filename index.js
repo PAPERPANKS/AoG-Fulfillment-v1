@@ -10,7 +10,6 @@ const Map = require('es6-map');
 app.use(bodyParser.json({type: 'application/json'}));
 app.use(express.static('public'));
 
-
 // Handle webhook requests
 app.post('/', function(req, res, next) {
   logObject('Request headers: ', req.headers);
@@ -20,14 +19,14 @@ app.post('/', function(req, res, next) {
   const assistant = new ApiAiAssistant({request: req, response: res});
 
   // Declare constants for your action and parameter names
-  const ACTION_PRICE = 'price';
+  const ACTION_PRICE = 'price'; //add this in Intents section in Dialogflow
   
   // Declare parameters name here
-  const COINS_PARAMETER = 'crypto_coins';
-
-  let coin = assistant.getArgument(COINS_PARAMETER);    // type of coin
+  const COINS_PARAMETER = 'crypto_coins'; //add this in Entities section in Dialogflow
+  let coin = assistant.getArgument(COINS_PARAMETER);    
   
-  const api_url ='https://api.coinmarketcap.com/v1/ticker/' ;
+  //api calls
+  const api_url ='https://api.coinmarketcap.com/v1/ticker/' ; 
   
   // Create functions to handle intents here
   function priceHandler(assistant) {
@@ -39,22 +38,20 @@ app.post('/', function(req, res, next) {
         next(error);
       } else {        
         let body = JSON.parse(response.body);
-        let price = body[0]['price'];
+        let price = body[0]['price_usd'];
         
-        logObject('the current coin price : ' , price);
+        logObject('logging price: ' , price);
         // Respond to the user with the current price.
-				const msg = "Right now the price is" + price ;
+				const msg = "Right now the price is $ " + price ;
 				assistant.tell(msg);
 				}
     });
   }
-
-  
+ 
   // Add handler functions to the action router.
   let actionRouter = new Map();
   actionRouter.set(ACTION_PRICE, priceHandler);
-  
-  
+   
   // Route requests to the proper handler functions via the action router.
   assistant.handleRequest(actionRouter);
 
